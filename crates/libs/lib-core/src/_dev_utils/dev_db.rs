@@ -12,7 +12,7 @@ type Db = Pool<Postgres>;
 
 // NOTE: Hardcode to prevent deployed system db update.
 const PG_DEV_POSTGRES_URL: &str = "postgres://postgres:welcome@localhost/postgres";
-const PG_DEV_APP_URL: &str = "postgres://app_user:dev_only_pwd@localhost/app_db";
+const PG_DEV_APP_URL: &str = "postgres://ganin_user:dev_only_pwd@localhost/ganin_ws_db";
 
 // sql files
 const SQL_RECREATE_DB_FILE_NAME: &str = "00-recreate-db.sql";
@@ -36,7 +36,8 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
 	};
 	let sql_dir = base_dir.join(SQL_DIR);
 
-	// -- Create the app_db/app_user with the postgres user.
+	// -- Create the ganin_ws_db/ganin_user with the postgres user.
+  //  comment block berikut Agar tidak selalu recreate.
 	{
 		let sql_recreate_db_file = sql_dir.join(SQL_RECREATE_DB_FILE_NAME);
 		let root_db = new_db_pool(PG_DEV_POSTGRES_URL).await?;
@@ -50,15 +51,13 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
 	paths.sort();
 
 	// -- SQL Execute each file.
-	let app_db = new_db_pool(PG_DEV_APP_URL).await?;
+	let ganin_ws_db = new_db_pool(PG_DEV_APP_URL).await?;
 
 	for path in paths {
 		let path_str = path.to_string_lossy();
 
-		if path_str.ends_with(".sql")
-			&& !path_str.ends_with(SQL_RECREATE_DB_FILE_NAME)
-		{
-			pexec(&app_db, &path).await?;
+		if path_str.ends_with(".sql") && !path_str.ends_with(SQL_RECREATE_DB_FILE_NAME) {
+			pexec(&ganin_ws_db, &path).await?;
 		}
 	}
 
