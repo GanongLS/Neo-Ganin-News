@@ -43,6 +43,7 @@ pub enum TimestampIden {
 /// whether the table has timestamp columns (cid, ctime, mid, mtime), and more as the
 /// code evolves.
 ///
+/// BMC stand for what? I don't really remember it but it seem like Business Model Ccontroller _LS
 /// Note: This trait should not be confused with the BaseCrudBmc trait, which provides
 ///       common default CRUD BMC functions for a given Bmc/Entity.
 pub trait DbBmc {

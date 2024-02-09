@@ -5,13 +5,13 @@ use crate::model::modql_utils::time_to_sea_value;
 use crate::model::ModelManager;
 use crate::model::Result;
 use lib_utils::time::Rfc3339;
-use modql::field::Fields;
-use modql::filter::{FilterNodes, OpValsString, OpValsValue};
-use modql::filter::{ListOptions, OpValsInt64};
+use modql::{
+	field::Fields,
+	filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue},
+};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::FromRow;
+use sqlx::{types::time::OffsetDateTime, FromRow};
 
 // region:    --- Agent Types
 
@@ -194,8 +194,7 @@ mod tests {
 				"name": {"$startsWith": "test_first_ok agent"}
 			}
 		))?;
-		let agent =
-			AgentBmc::first(&ctx, &mm, Some(vec![agent_filter]), None).await?;
+		let agent = AgentBmc::first(&ctx, &mm, Some(vec![agent_filter]), None).await?;
 
 		// -- Check
 		let agent = agent.ok_or("No Agent Returned (should have returned one")?;
@@ -230,8 +229,7 @@ mod tests {
 				"name": {"$contains": "list_ok agent"}
 			}
 		))?;
-		let agents =
-			AgentBmc::list(&ctx, &mm, Some(vec![agent_filter]), None).await?;
+		let agents = AgentBmc::list(&ctx, &mm, Some(vec![agent_filter]), None).await?;
 
 		// -- Check
 		assert_eq!(agents.len(), 2);
