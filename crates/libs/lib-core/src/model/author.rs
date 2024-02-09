@@ -34,7 +34,6 @@ impl From<AuthorType> for sea_query::Value {
 pub struct Author {
 	pub user_id: i64,
 	pub typ: AuthorType,
-	pub full_name: Option<String>,
 	pub pen_name: String,
 	pub bio: Option<String>,
 	pub website: Option<String>,
@@ -45,7 +44,6 @@ pub struct Author {
 pub struct AuthorForCreate {
 	pub user_id: i64,
 	pub pen_name: String,
-	pub full_name: Option<String>,
 	pub bio: Option<String>,
 	pub website: Option<String>,
 	pub avatar_url: Option<String>,
@@ -60,7 +58,6 @@ pub struct AuthorForInsert {
 #[derive(Clone, FromRow, Fields, Debug)]
 pub struct AuthorForUpdate {
 	pub user_id: i64,
-	pub full_name: Option<String>,
 	pub pen_name: String,
 	pub bio: Option<String>,
 	pub website: Option<String>,
@@ -72,7 +69,8 @@ pub trait AuthorBy: HasFields + for<'r> FromRow<'r, PgRow> + Unpin + Send {}
 
 impl AuthorBy for Author {}
 impl AuthorBy for AuthorForCreate {}
-impl AuthorBy for AuthorForCreate {}
+impl AuthorBy for AuthorForInsert {}
+impl AuthorBy for AuthorForUpdate {}
 
 // Note: Since the entity properties Iden will be given by modql
 //       AuthorIden does not have to be exhaustive, but just have the columns
@@ -89,7 +87,6 @@ enum AuthorIden {
 pub struct AuthorFilter {
 	pub user_id: Option<OpValsInt64>,
 	pub typ: Option<OpValsString>,
-	pub full_name: Option<OpValsString>,
 	pub pen_name: Option<OpValsString>,
 }
 // endregion: --- Author Types
@@ -111,7 +108,6 @@ impl AuthorBmc {
 		let AuthorForCreate {
 			user_id,
 			pen_name,
-			full_name,
 			bio,
 			website,
 			avatar_url,

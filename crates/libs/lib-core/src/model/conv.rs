@@ -1,17 +1,13 @@
 use crate::ctx::Ctx;
 use crate::generate_common_bmc_fns;
 use crate::model::base::{self, DbBmc};
-use crate::model::conv_msg::{
-	ConvMsg, ConvMsgBmc, ConvMsgForCreate, ConvMsgForInsert,
-};
+use crate::model::conv_msg::{ConvMsg, ConvMsgBmc, ConvMsgForCreate, ConvMsgForInsert};
 use crate::model::modql_utils::time_to_sea_value;
 use crate::model::ModelManager;
 use crate::model::Result;
 use lib_utils::time::Rfc3339;
 use modql::field::Fields;
-use modql::filter::{
-	FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue,
-};
+use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue};
 use sea_query::Nullable;
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
@@ -81,13 +77,13 @@ pub struct Conv {
 
 	// -- Timestamps
 	// creator user_id and time
-	pub cid: i64,
+	pub creator_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub ctime: OffsetDateTime,
+	pub creation_time: OffsetDateTime,
 	// last modifier user_id and time
-	pub mid: i64,
+	pub updater_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub mtime: OffsetDateTime,
+	pub updated_time: OffsetDateTime,
 }
 
 #[derive(Fields, Deserialize, Default)]
@@ -119,12 +115,15 @@ pub struct ConvFilter {
 
 	pub title: Option<OpValsString>,
 
-	pub cid: Option<OpValsInt64>,
+	// -- Timestamps
+	// creator user_id and time
+	pub creator_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub ctime: Option<OpValsValue>,
-	pub mid: Option<OpValsInt64>,
+	pub creation_time: Option<OpValsValue>,
+	// last modifier user_id and time
+	pub updater_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub mtime: Option<OpValsValue>,
+	pub updated_time: Option<OpValsValue>,
 }
 
 // endregion: --- Conv Types
@@ -170,11 +169,7 @@ impl ConvBmc {
 
 	/// NOTE: The current strategy is to not require conv_id, but we will check
 	///       that user have `conv:ReadMsg` privilege on correponding conv (post base::get).
-	pub async fn get_msg(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		msg_id: i64,
-	) -> Result<ConvMsg> {
+	pub async fn get_msg(ctx: &Ctx, mm: &ModelManager, msg_id: i64) -> Result<ConvMsg> {
 		let conv_msg: ConvMsg = base::get::<ConvMsgBmc, _>(ctx, mm, msg_id).await?;
 
 		// TODO: Validate conv_msg is with ctx.conv_id

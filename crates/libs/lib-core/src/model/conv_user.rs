@@ -19,13 +19,13 @@ pub struct ConvUser {
 
 	// -- Timestamps
 	// creator user_id and time
-	pub cid: i64,
+	pub creator_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub ctime: OffsetDateTime,
+	pub creation_time: OffsetDateTime,
 	// last modifier user_id and time
-	pub mid: i64,
+	pub updater_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub mtime: OffsetDateTime,
+	pub updated_time: OffsetDateTime,
 }
 
 #[derive(Fields, Deserialize)]

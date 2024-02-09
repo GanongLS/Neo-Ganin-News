@@ -36,8 +36,8 @@ async fn main() -> Result<()> {
 	let mm = ModelManager::new().await?;
 
 	// -- Define Routes
-	let routes_rpc = web::routes_rpc::routes(mm.clone())
-		.route_layer(middleware::from_fn(mw_ctx_require));
+	let routes_rpc =
+		web::routes_rpc::routes(mm.clone()).route_layer(middleware::from_fn(mw_ctx_require));
 
 	let routes_all = Router::new()
 		.merge(routes_login::routes(mm.clone()))

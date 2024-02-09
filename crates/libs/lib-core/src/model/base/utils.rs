@@ -27,20 +27,37 @@ where
 }
 
 /// Update the timestamps info for create
-/// (e.g., cid, ctime, and mid, mtime will be updated with the same values)
-fn add_timestamps_for_create(fields: &mut Fields, user_id: i64) {
+/// (e.g., creator_id, creation_time, updater_id and updated_time will be updated with the same values)
+fn add_timestamps_for_create(fields: &mut Fields, creator_id: i64) {
 	let now = now_utc();
-	fields.push(Field::new(TimestampIden::Cid.into_iden(), user_id.into()));
-	fields.push(Field::new(TimestampIden::Ctime.into_iden(), now.into()));
-
-	fields.push(Field::new(TimestampIden::Mid.into_iden(), user_id.into()));
-	fields.push(Field::new(TimestampIden::Mtime.into_iden(), now.into()));
+	fields.push(Field::new(
+		TimestampIden::CreatorId.into_iden(),
+		creator_id.into(),
+	));
+	fields.push(Field::new(
+		TimestampIden::CreationTime.into_iden(),
+		now.into(),
+	));
+	fields.push(Field::new(
+		TimestampIden::UpdaterId.into_iden(),
+		creator_id.into(),
+	));
+	fields.push(Field::new(
+		TimestampIden::UpdatedTime.into_iden(),
+		now.into(),
+	));
 }
 
 /// Update the timestamps info only for update.
-/// (.e.g., only mid, mtime will be udpated)
-fn add_timestamps_for_update(fields: &mut Fields, user_id: i64) {
+/// (.e.g., only updater_id and updated_time will be udpated)
+fn add_timestamps_for_update(fields: &mut Fields, updater_id: i64) {
 	let now = now_utc();
-	fields.push(Field::new(TimestampIden::Mid.into_iden(), user_id.into()));
-	fields.push(Field::new(TimestampIden::Mtime.into_iden(), now.into()));
+	fields.push(Field::new(
+		TimestampIden::UpdaterId.into_iden(),
+		updater_id.into(),
+	));
+	fields.push(Field::new(
+		TimestampIden::UpdatedTime.into_iden(),
+		now.into(),
+	));
 }

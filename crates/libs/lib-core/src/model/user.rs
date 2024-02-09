@@ -5,9 +5,7 @@ use crate::model::ModelManager;
 use crate::model::{Error, Result};
 use lib_auth::pwd::{self, ContentToHash};
 use modql::field::{Field, Fields, HasFields};
-use modql::filter::{
-	FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue,
-};
+use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue};
 use sea_query::{Expr, Iden, PostgresQueryBuilder, Query};
 use sea_query_binder::SqlxBinder;
 use serde::{Deserialize, Serialize};
@@ -22,6 +20,7 @@ pub enum UserTyp {
 	Sys,
 	User,
 }
+
 impl From<UserTyp> for sea_query::Value {
 	fn from(val: UserTyp) -> Self {
 		val.to_string().into()
@@ -32,25 +31,33 @@ impl From<UserTyp> for sea_query::Value {
 pub struct User {
 	pub id: i64,
 	pub username: String,
+	pub email: String,
+	pub first_name: String,
+	pub last_name: String,
 	pub typ: UserTyp,
 }
 
 #[derive(Deserialize)]
 pub struct UserForCreate {
 	pub username: String,
+	pub email: String,
+	pub first_name: String,
+	pub last_name: String,
 	pub pwd_clear: String,
 }
 
 #[derive(Fields)]
 pub struct UserForInsert {
 	pub username: String,
+	pub email: String,
+	pub first_name: String,
+	pub last_name: String,
 }
 
 #[derive(Clone, FromRow, Fields, Debug)]
 pub struct UserForLogin {
 	pub id: i64,
 	pub username: String,
-
 	// -- pwd and token info
 	pub pwd: Option<String>, // encrypted, #_scheme_id_#....
 	pub pwd_salt: Uuid,
@@ -61,7 +68,6 @@ pub struct UserForLogin {
 pub struct UserForAuth {
 	pub id: i64,
 	pub username: String,
-
 	// -- token info
 	pub token_salt: Uuid,
 }
@@ -86,15 +92,16 @@ enum UserIden {
 #[derive(FilterNodes, Deserialize, Default, Debug)]
 pub struct UserFilter {
 	pub id: Option<OpValsInt64>,
-
 	pub username: Option<OpValsString>,
-
-	pub cid: Option<OpValsInt64>,
+	pub email: Option<OpValsString>,
+	pub first_name: Option<OpValsString>,
+	pub last_name: Option<OpValsString>,
+	pub creator_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub ctime: Option<OpValsValue>,
-	pub mid: Option<OpValsInt64>,
+	pub creation_time: Option<OpValsValue>,
+	pub updater_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub mtime: Option<OpValsValue>,
+	pub updated_time: Option<OpValsValue>,
 }
 
 // endregion: --- User Types
@@ -116,11 +123,17 @@ impl UserBmc {
 		let UserForCreate {
 			username,
 			pwd_clear,
+			email,
+			first_name,
+			last_name,
 		} = user_c;
 
 		// -- Create the user row
 		let user_fi = UserForInsert {
 			username: username.to_string(),
+			email: email.to_string(),
+			first_name: first_name.to_string(),
+			last_name: last_name.to_string(),
 		};
 
 		// Start the transaction
@@ -128,20 +141,21 @@ impl UserBmc {
 
 		mm.dbx().begin_txn().await?;
 
-		let user_id = base::create::<Self, _>(ctx, &mm, user_fi).await.map_err(
-			|model_error| {
-				Error::resolve_unique_violation(
-					model_error,
-					Some(|table: &str, constraint: &str| {
-						if table == "user" && constraint.contains("username") {
-							Some(Error::UserAlreadyExists { username })
-						} else {
-							None // Error::UniqueViolation will be created by resolve_unique_violation
-						}
-					}),
-				)
-			},
-		)?;
+		let user_id =
+			base::create::<Self, _>(ctx, &mm, user_fi)
+				.await
+				.map_err(|model_error| {
+					Error::resolve_unique_violation(
+						model_error,
+						Some(|table: &str, constraint: &str| {
+							if table == "user" && constraint.contains("username") {
+								Some(Error::UserAlreadyExists { username })
+							} else {
+								None // Error::UniqueViolation will be created by resolve_unique_violation
+							}
+						}),
+					)
+				})?;
 
 		// -- Update the database
 		Self::update_pwd(ctx, &mm, user_id, &pwd_clear).await?;
@@ -230,7 +244,8 @@ impl UserBmc {
 	///       - Set `deleted: true`.
 	///       - Change `username` to "DELETED-_user_id_".
 	///       - Clear any other UUIDs or PII (Personally Identifiable Information).
-	///       - The automatically set `mid`/`mtime` will record who performed the deletion.
+	///       - The automatically set `updater_id`/`updated_time` will record who performed the deletion.
+
 	///       - It's likely necessary to record this action in a `um_change_log` (a user management change audit table).
 	///       - Remove or clean up any user-specific assets (messages, etc.).
 	pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
@@ -259,6 +274,9 @@ mod tests {
 		let ctx = Ctx::root_ctx();
 		let fx_username = "test_create_ok-user-01";
 		let fx_pwd_clear = "test_create_ok pwd 01";
+		let fx_email = "test_create_ok@example.com";
+		let fx_first_name = "John";
+		let fx_last_name = "Doe";
 
 		// -- Exec
 		let user_id = UserBmc::create(
@@ -267,13 +285,19 @@ mod tests {
 			UserForCreate {
 				username: fx_username.to_string(),
 				pwd_clear: fx_pwd_clear.to_string(),
+				email: fx_email.to_string(),
+				first_name: fx_first_name.to_string(),
+				last_name: fx_last_name.to_string(),
 			},
 		)
 		.await?;
 
 		// -- Check
-		let user: UserForLogin = UserBmc::get(&ctx, &mm, user_id).await?;
+		let user: User = UserBmc::get(&ctx, &mm, user_id).await?;
 		assert_eq!(user.username, fx_username);
+		assert_eq!(user.email, fx_email);
+		assert_eq!(user.first_name, fx_first_name.to_string());
+		assert_eq!(user.last_name, fx_last_name.to_string());
 
 		// -- Clean
 		UserBmc::delete(&ctx, &mm, user_id).await?;

@@ -29,13 +29,16 @@ pub struct Agent {
 	pub ai_model: String,
 
 	// -- Timestamps
-	//    (creator and last modified user_id/time)
-	pub cid: i64,
+	// (creator and last modified user_id/time)
+	// Renamed from cid
+	pub creator_id: i64,
+	// Renamed from ctime
 	#[serde_as(as = "Rfc3339")]
-	pub ctime: OffsetDateTime,
-	pub mid: i64,
+	pub creation_time: OffsetDateTime,
+	pub updater_id: i64,
+	// Renamed from mtime
 	#[serde_as(as = "Rfc3339")]
-	pub mtime: OffsetDateTime,
+	pub updated_time: OffsetDateTime,
 }
 
 #[derive(Fields, Deserialize)]
@@ -53,12 +56,12 @@ pub struct AgentFilter {
 	pub id: Option<OpValsInt64>,
 	pub name: Option<OpValsString>,
 
-	pub cid: Option<OpValsInt64>,
+	pub creator_id: Option<OpValsInt64>, // Renamed from cid
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub ctime: Option<OpValsValue>,
-	pub mid: Option<OpValsInt64>,
+	pub creation_time: Option<OpValsValue>, // Renamed from ctime
+	pub updater_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub mtime: Option<OpValsValue>,
+	pub updated_time: Option<OpValsValue>, // Renamed from mtime
 }
 
 // endregion: --- Agent Types

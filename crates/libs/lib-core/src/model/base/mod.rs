@@ -30,18 +30,17 @@ pub enum CommonIden {
 
 #[derive(Iden)]
 pub enum TimestampIden {
-	Cid,
-	Ctime,
-	Mid,
-	Mtime,
+	CreatorId,
+	CreationTime,
+	UpdaterId,
+	UpdatedTime,
 }
 
 // endregion: --- SeaQuery Idens
 
 /// The DbBmc trait must be implemented for the Bmc struct of an entity.
 /// It specifies meta information such as the table name,
-/// whether the table has timestamp columns (cid, ctime, mid, mtime), and more as the
-/// code evolves.
+/// Whether the table has timestamp columns (creator_id, creation_time, updater_id, updated_time), and more as the code evolves.
 ///
 /// BMC stand for what? I don't really remember it but it seem like Business Model Ccontroller _LS
 /// Note: This trait should not be confused with the BaseCrudBmc trait, which provides
@@ -53,7 +52,7 @@ pub trait DbBmc {
 		TableRef::Table(SIden(Self::TABLE).into_iden())
 	}
 
-	/// Specifies that the table for this Bmc has timestamps (cid, ctime, mid, mtime) columns.
+	/// Specifies that the table for this Bmc has timestamps (creator_id, creation_time, updater_id, updated_time) columns.
 	/// This will allow the code to update those as needed.
 	///
 	/// default: true

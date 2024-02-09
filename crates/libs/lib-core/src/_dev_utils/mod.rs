@@ -17,12 +17,13 @@ use tracing::info;
 pub async fn init_dev() {
 	static INIT: OnceCell<()> = OnceCell::const_new();
 
-	INIT.get_or_init(|| async {
-		info!("{:<12} - init_dev_all()", "FOR-DEV-ONLY");
+	INIT
+		.get_or_init(|| async {
+			info!("{:<12} - init_dev_all()", "FOR-DEV-ONLY");
 
-		dev_db::init_dev_db().await.unwrap();
-	})
-	.await;
+			dev_db::init_dev_db().await.unwrap();
+		})
+		.await;
 }
 
 /// Initialize test environment.
@@ -63,6 +64,9 @@ pub async fn seed_user(
 	username: &str,
 ) -> model::Result<i64> {
 	let pwd_clear = "seed-user-pwd";
+	let email = "seed_user@example.com";
+	let first_name = "Seed";
+	let last_name = "User";
 
 	let id = model::user::UserBmc::create(
 		ctx,
@@ -70,6 +74,9 @@ pub async fn seed_user(
 		model::user::UserForCreate {
 			username: username.to_string(),
 			pwd_clear: pwd_clear.to_string(),
+			email: email.to_string(),
+			first_name: first_name.to_string(),
+			last_name: last_name.to_string(),
 		},
 	)
 	.await?;
@@ -86,9 +93,7 @@ pub async fn clean_users(
 		ctx,
 		mm,
 		Some(vec![model::user::UserFilter {
-			username: Some(
-				OpValString::Contains(contains_username.to_string()).into(),
-			),
+			username: Some(OpValString::Contains(contains_username.to_string()).into()),
 			..Default::default()
 		}]),
 		None,

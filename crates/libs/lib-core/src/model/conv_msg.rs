@@ -25,13 +25,13 @@ pub struct ConvMsg {
 
 	// -- Timestamps
 	// creator user_id and time
-	pub cid: i64,
+	pub creator_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub ctime: OffsetDateTime,
+	pub creation_time: OffsetDateTime,
 	// last modifier user_id and time
-	pub mid: i64,
+	pub updater_id: i64,
 	#[serde_as(as = "Rfc3339")]
-	pub mtime: OffsetDateTime,
+	pub updated_time: OffsetDateTime,
 }
 
 impl ConvScoped for ConvMsg {
@@ -59,7 +59,7 @@ impl ConvScoped for ConvMsgForCreate {
 ///     is to create a `...ForInsert` type, visible only in the model layer.
 ///   - This approach maintains a simple and ergonomic public API while ensuring
 ///     strong typing for database insertion.
-///   - Exceptions apply to lower-level attributes like cid, ctime, mid, mtime, and owner_id,
+///   - Exceptions apply to lower-level attributes like creator_id, creation_time, updater_id, updated_time, and owner_id,
 ///     which can be set directly through the base:: functions or some utilities. There's not
 ///     significant value in introducing `...ForInsert` types for all entities just for these
 ///     common, low-level database properties.
@@ -99,12 +99,13 @@ pub struct ConvMsgFilter {
 	conv_id: Option<OpValsInt64>,
 	content: Option<OpValsString>,
 
-	cid: Option<OpValsInt64>,
+	// Timestamps
+	creator_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	ctime: Option<OpValsValue>,
-	mid: Option<OpValsInt64>,
+	creation_time: Option<OpValsValue>,
+	updater_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	mtime: Option<OpValsValue>,
+	updated_time: Option<OpValsValue>,
 }
 
 // endregion: --- Types
