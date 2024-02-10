@@ -401,3 +401,94 @@ VALUES (
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
   );
+
+INSERT INTO subscriptions (
+    subscriber,
+    subscription_content,
+    subscription_start_time,
+    subscription_end_time
+  )
+VALUES (
+    1000,
+    'Subscription content 1',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP + INTERVAL '1 year'
+  ),
+  (
+    1002,
+    'Subscription content 2',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP + INTERVAL '1 year'
+  ),
+  (
+    1001,
+    'Subscription content 3',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP + INTERVAL '1 year'
+  );
+
+-- Subscription 1,2,3
+INSERT INTO subscriptions (
+    subscriber,
+    subscription_content,
+    subscription_start_time,
+    subscription_end_time,
+    creation_time,
+    updated_time,
+    creator_id,
+    updater_id
+  )
+VALUES (
+    /* subscriber */
+    1000,
+    /* subscription_content */
+    'Subscription 1 content',
+    /* subscription_start_time */
+    CURRENT_TIMESTAMP,
+    /* subscription_end_time */
+    CURRENT_TIMESTAMP + INTERVAL '1 year',
+    /* creation_time */
+    CURRENT_TIMESTAMP,
+    /* updated_time */
+    CURRENT_TIMESTAMP,
+    /* creator_id */
+    0,
+    /* updater_id */
+    0
+  ),
+  (
+    /* subscriber */
+    1001,
+    /* subscription_content */
+    'Subscription 2 content',
+    /* subscription_start_time */
+    CURRENT_TIMESTAMP,
+    /* subscription_end_time */
+    CURRENT_TIMESTAMP + INTERVAL '1 year',
+    /* creation_time */
+    CURRENT_TIMESTAMP,
+    /* updated_time */
+    CURRENT_TIMESTAMP,
+    /* creator_id */
+    0,
+    /* updater_id */
+    0
+  ),
+  (
+    /* subscriber */
+    1002,
+    /* subscription_content */
+    'Subscription 3 content',
+    /* subscription_start_time */
+    CURRENT_TIMESTAMP,
+    /* subscription_end_time */
+    CURRENT_TIMESTAMP + INTERVAL '1 year',
+    /* creation_time */
+    CURRENT_TIMESTAMP,
+    /* updated_time */
+    CURRENT_TIMESTAMP,
+    /* creator_id */
+    0,
+    /* updater_id */
+    0
+  );
