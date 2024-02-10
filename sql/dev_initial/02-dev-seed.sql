@@ -247,3 +247,157 @@ VALUES (
     0,
     CURRENT_TIMESTAMP
   );
+
+-- Articles
+INSERT INTO articles (
+    title,
+    content,
+    category_id,
+    author_id,
+    art_version,
+    approval_state,
+    approver_id,
+    approval_time,
+    publication_date,
+    tags,
+    is_featured,
+    views,
+    image_url,
+    likes,
+    creation_time,
+    updated_time,
+    creator_id,
+    updater_id
+  )
+VALUES (
+    'Title of Article 1',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
+    1000,
+    1000,
+    -- Category_id and author_id
+    1,
+    'Draft',
+    NULL,
+    NULL,
+    NULL,
+    '{"tag1", "tag2", "tag3"}',
+    false,
+    0,
+    NULL,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    1000,
+    1000 -- creator_id and updater_id
+  ),
+  (
+    'Title of Article 2',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
+    1001,
+    1001,
+    -- Category_id and author_id
+    1,
+    'Draft',
+    NULL,
+    NULL,
+    NULL,
+    '{"tag1", "tag2", "tag3"}',
+    false,
+    0,
+    NULL,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    1001,
+    1001 -- creator_id and updater_id
+  ),
+  (
+    'Title of Article 3',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
+    1002,
+    1002,
+    -- Category_id and author_id
+    1,
+    'Draft',
+    NULL,
+    NULL,
+    NULL,
+    '{"tag1", "tag2", "tag3"}',
+    false,
+    0,
+    NULL,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    1002,
+    1002 -- creator_id and updater_id
+  );
+
+-- Comments for article with id 1001
+INSERT INTO comments (
+    article_id,
+    user_id,
+    content,
+    creation_time,
+    updated_time
+  )
+VALUES (
+    1001,
+    1000,
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ),
+  (
+    1001,
+    1002,
+    'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  );
+
+-- Comments for article with id 1000
+INSERT INTO comments (
+    article_id,
+    user_id,
+    content,
+    creation_time,
+    updated_time
+  )
+VALUES (
+    1000,
+    1002,
+    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ),
+  (
+    1000,
+    1001,
+    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  );
+
+-- Comments for article with id 1002
+INSERT INTO comments (
+    article_id,
+    user_id,
+    content,
+    creation_time,
+    updated_time
+  )
+VALUES (
+    1002,
+    1001,
+    'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ),
+  (
+    1002,
+    1000,
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  );

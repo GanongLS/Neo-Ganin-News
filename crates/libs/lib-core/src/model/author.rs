@@ -176,7 +176,6 @@ impl AuthorBmc {
 // endregion: --- AuthorBmc
 
 // region:    --- Author Tests
-
 #[cfg(test)]
 mod tests {
 	pub type Result<T> = core::result::Result<T, Error>;
