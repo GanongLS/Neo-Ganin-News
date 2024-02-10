@@ -115,7 +115,13 @@ CREATE TABLE categories (
   name VARCHAR(256) NOT NULL,
   description TEXT,
   parent_id INTEGER REFERENCES categories(id),
-  is_featured BOOLEAN NOT NULL
+  -- Set default value to false
+  is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Timestamp
+  creator_id BIGINT NOT NULL,
+  creation_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updater_id BIGINT NOT NULL,
+  updated_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TYPE APPROVAL_STATE AS ENUM (
@@ -133,14 +139,13 @@ CREATE TABLE articles (
   author_id SMALLINT NOT NULL,
   VERSION SMALLINT NOT NULL,
   approval_state APPROVAL_STATE NOT NULL,
-  approved_by SMALLINT,
+  approver_id SMALLINT,
+  approval_time TIMESTAMP,
   publication_date TIMESTAMP,
   tags VARCHAR(255) [],
   is_featured BOOLEAN NOT NULL,
   views INTEGER NOT NULL,
   image_url VARCHAR(255),
-  meta_description TEXT,
-  meta_keywords VARCHAR(255) [],
   likes INTEGER NOT NULL
 );
 

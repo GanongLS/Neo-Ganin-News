@@ -172,3 +172,76 @@ impl AuthorBmc {
 		base::list::<Self, _, _>(ctx, mm, filter, list_options).await
 	}
 }
+
+// endregion: --- AuthorBmc
+
+// region:    --- Author Tests
+
+#[cfg(test)]
+mod tests {
+	pub type Result<T> = core::result::Result<T, Error>;
+	pub type Error = Box<dyn std::error::Error>; // For tests.
+
+	use super::*;
+	use crate::_dev_utils;
+	use serial_test::serial;
+
+	#[serial]
+	#[tokio::test]
+	async fn test_create_ok() -> Result<()> {
+		// -- Setup & Fixtures
+		let mm = _dev_utils::init_test().await;
+		let ctx = Ctx::root_ctx();
+		let fx_pen_name = "test_create_ok-pen-name-01";
+		let fx_bio = "Author bio goes here";
+		let fx_website = "http://example.com";
+		let fx_avatar_url = "http://example.com/avatar.jpg";
+
+		// -- Exec
+		let author_id = AuthorBmc::create(
+			&ctx,
+			&mm,
+			AuthorForCreate {
+				user_id: 0, // Specify the user_id accordingly
+				pen_name: fx_pen_name.to_string(),
+				bio: Some(fx_bio.to_string()),
+				website: Some(fx_website.to_string()),
+				avatar_url: Some(fx_avatar_url.to_string()),
+			},
+		)
+		.await?;
+
+		// -- Check
+		let author: Author = AuthorBmc::get(&ctx, &mm, author_id).await?;
+		assert_eq!(author.pen_name, fx_pen_name);
+		assert_eq!(author.bio, Some(fx_bio.to_string()));
+		assert_eq!(author.website, Some(fx_website.to_string()));
+		assert_eq!(author.avatar_url, Some(fx_avatar_url.to_string()));
+
+		// -- Clean
+		AuthorBmc::delete(&ctx, &mm, author_id).await?;
+
+		Ok(())
+	}
+
+	#[serial]
+	#[tokio::test]
+	async fn test_first_ok_demo1() -> Result<()> {
+		// -- Setup & Fixtures
+		let mm = _dev_utils::init_test().await;
+		let ctx = Ctx::root_ctx();
+		let fx_pen_name = "demo1";
+
+		// -- Exec
+		let author: Author = AuthorBmc::first_by_pen_name(&ctx, &mm, fx_pen_name)
+			.await?
+			.ok_or("Should have author with pen name 'demo1'")?;
+
+		// -- Check
+		assert_eq!(author.pen_name, fx_pen_name);
+
+		Ok(())
+	}
+}
+
+// endregion: --- Author Tests
