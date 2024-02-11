@@ -117,7 +117,7 @@ VALUES (
   );
 
 -- Categories
-INSERT INTO categories (
+INSERT INTO category (
     name,
     description,
     parent_id,
@@ -249,18 +249,18 @@ VALUES (
   );
 
 -- Articles
-INSERT INTO articles (
+INSERT INTO article (
     title,
     content,
     category_id,
     author_id,
-    art_version,
+    -- art_version, 
     approval_state,
     approver_id,
     approval_time,
-    publication_date,
-    tags,
-    is_featured,
+    -- publication_date,
+    -- tags,
+    -- is_featured,
     views,
     image_url,
     likes,
@@ -274,14 +274,9 @@ VALUES (
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
     1000,
     1000,
-    -- Category_id and author_id
-    1,
     'Draft',
     NULL,
     NULL,
-    NULL,
-    '{"tag1", "tag2", "tag3"}',
-    false,
     0,
     NULL,
     0,
@@ -295,14 +290,9 @@ VALUES (
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
     1001,
     1001,
-    -- Category_id and author_id
-    1,
     'Draft',
     NULL,
     NULL,
-    NULL,
-    '{"tag1", "tag2", "tag3"}',
-    false,
     0,
     NULL,
     0,
@@ -316,14 +306,9 @@ VALUES (
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
     1002,
     1002,
-    -- Category_id and author_id
-    1,
     'Draft',
     NULL,
     NULL,
-    NULL,
-    '{"tag1", "tag2", "tag3"}',
-    false,
     0,
     NULL,
     0,
@@ -402,7 +387,7 @@ VALUES (
     CURRENT_TIMESTAMP
   );
 
-INSERT INTO subscriptions (
+INSERT INTO subscription (
     subscriber,
     subscription_content,
     subscription_start_time,
@@ -428,7 +413,7 @@ VALUES (
   );
 
 -- Subscription 1,2,3
-INSERT INTO subscriptions (
+INSERT INTO subscription (
     subscriber,
     subscription_content,
     subscription_start_time,

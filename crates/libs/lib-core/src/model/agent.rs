@@ -30,13 +30,10 @@ pub struct Agent {
 
 	// -- Timestamps
 	// (creator and last modified user_id/time)
-	// Renamed from cid
 	pub creator_id: i64,
-	// Renamed from ctime
 	#[serde_as(as = "Rfc3339")]
 	pub creation_time: OffsetDateTime,
 	pub updater_id: i64,
-	// Renamed from mtime
 	#[serde_as(as = "Rfc3339")]
 	pub updated_time: OffsetDateTime,
 }
@@ -56,12 +53,12 @@ pub struct AgentFilter {
 	pub id: Option<OpValsInt64>,
 	pub name: Option<OpValsString>,
 
-	pub creator_id: Option<OpValsInt64>, // Renamed from cid
+	pub creator_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub creation_time: Option<OpValsValue>, // Renamed from ctime
+	pub creation_time: Option<OpValsValue>,
 	pub updater_id: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
-	pub updated_time: Option<OpValsValue>, // Renamed from mtime
+	pub updated_time: Option<OpValsValue>,
 }
 
 // endregion: --- Agent Types

@@ -94,7 +94,7 @@ pub struct CategoryFilter {
 pub struct CategoryBmc;
 
 impl DbBmc for CategoryBmc {
-	const TABLE: &'static str = "categories";
+	const TABLE: &'static str = "category";
 }
 
 impl CategoryBmc {

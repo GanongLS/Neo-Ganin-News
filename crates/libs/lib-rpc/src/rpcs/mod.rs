@@ -1,6 +1,7 @@
 use crate::router::RpcRouter;
 
 pub mod agent_rpc;
+pub mod article_rpc;
 pub mod conv_rpc;
 mod macro_utils;
 mod prelude;

@@ -63,7 +63,7 @@ impl SubscriptionBy for SubscriptionForList {}
 pub struct SubscriptionBmc;
 
 impl DbBmc for SubscriptionBmc {
-	const TABLE: &'static str = "subscriptions";
+	const TABLE: &'static str = "subscription";
 }
 
 impl SubscriptionBmc {
