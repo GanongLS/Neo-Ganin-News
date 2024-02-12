@@ -99,7 +99,7 @@ pub struct ArticleForUpdate {
 	#[field(cast_as = "approval_state")]
 	pub approval_state: ApprovalState,
 	pub image_url: Option<String>,
-	// article views, likes, reaction, comments itu masuknya article accessories
+	// article views, likes, reaction, comment itu masuknya article accessories
 	pub likes: Option<i32>,
 }
 

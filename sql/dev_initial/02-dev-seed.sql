@@ -338,8 +338,8 @@ VALUES (
     1002 -- creator_id and updater_id
   );
 
--- Comments for article with id 1001
-INSERT INTO comments (
+-- Comment for article with id 1001
+INSERT INTO COMMENT (
     article_id,
     user_id,
     content,
@@ -361,8 +361,8 @@ VALUES (
     CURRENT_TIMESTAMP
   );
 
--- Comments for article with id 1000
-INSERT INTO comments (
+-- Comment for article with id 1000
+INSERT INTO COMMENT (
     article_id,
     user_id,
     content,
@@ -384,8 +384,8 @@ VALUES (
     CURRENT_TIMESTAMP
   );
 
--- Comments for article with id 1002
-INSERT INTO comments (
+-- Comment for article with id 1002
+INSERT INTO COMMENT (
     article_id,
     user_id,
     content,
@@ -498,43 +498,39 @@ VALUES (
     0
   );
 
-INSERT INTO article_accessory (
+INSERT INTO article_views (
     article_id,
-    views,
+    viewer_id,
     likes,
     dislikes,
-    creator_id,
-    updater_id,
+    SHARE,
     creation_time,
     updated_time
   )
 VALUES (
     1000,
-    100,
-    50,
-    10,
-    0,
-    0,
+    1002,
+    FALSE,
+    FALSE,
+    FALSE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
   ),
   (
     1001,
-    100,
-    50,
-    10,
-    0,
-    0,
+    1001,
+    FALSE,
+    TRUE,
+    FALSE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
   ),
   (
     1002,
-    50,
-    20,
-    5,
-    0,
-    0,
+    1000,
+    TRUE,
+    FALSE,
+    FALSE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
   );

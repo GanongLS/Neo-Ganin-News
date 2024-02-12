@@ -1,203 +1,212 @@
 use crate::ctx::Ctx;
-use crate::model::base::{self, prep_fields_for_update, DbBmc};
-use crate::model::modql_utils::time_to_sea_value;
-use crate::model::ModelManager;
-use crate::model::{Error, Result};
-use lib_auth::pwd::{self, ContentToHash};
-use modql::field::{Field, Fields, HasFields};
-use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue};
-use sea_query::{Expr, Iden, PostgresQueryBuilder, Query};
-use sea_query_binder::SqlxBinder;
+use crate::generate_common_bmc_fns;
+use crate::model::{
+	base::{self, DbBmc},
+	modql_utils::time_to_sea_value,
+	ModelManager, Result,
+};
+
+use modql::{
+	field::Fields,
+	filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue},
+};
+use sea_query::Nullable;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::FromRow;
-use uuid::Uuid;
+use serde_with::serde_as;
+
+use lib_utils::time::Rfc3339;
+use sqlx::{types::time::OffsetDateTime, FromRow};
 
 // region:    --- Comment Types
-#[derive(Clone, Debug, sqlx::Type, derive_more::Display, Deserialize, Serialize)]
-#[sqlx(type_name = "comment_typ")]
-pub enum CommentTyp {
+#[derive(
+	Copy, Clone, Debug, sqlx::Type, derive_more::Display, Deserialize, Serialize, Default,
+)]
+#[sqlx(type_name = "comment_type")]
+#[cfg_attr(test, derive(PartialEq))]
+pub enum CommentType {
+	#[default]
 	General,
-	Reply,
+	Replay,
 }
 
-impl From<CommentTyp> for sea_query::Value {
-	fn from(val: CommentTyp) -> Self {
+impl From<CommentType> for sea_query::Value {
+	fn from(val: CommentType) -> Self {
 		val.to_string().into()
 	}
 }
 
-#[derive(Clone, Fields, FromRow, Debug, Serialize)]
+/// Note: This is required for sea::query in case of None.
+///       However, in this codebase, we utilize the modql not_none_field,
+///       so this will be disregarded anyway.
+///       Nonetheless, it's still necessary for compilation.
+impl Nullable for CommentType {
+	fn null() -> sea_query::Value {
+		CommentType::General.into()
+	}
+}
+
+#[serde_as]
+#[derive(Clone, Debug, Fields, FromRow, Serialize)]
 pub struct Comment {
-	pub id: i32,
-	pub article_id: i32,
+	// Main field
+	pub id: i64,
+	pub article_id: i64,
 	pub user_id: i64,
 	pub content: String,
-	pub typ: CommentTyp,
+	pub comment_type: CommentType,
+	pub replay_to: Option<i64>, // Nullable
+
+	// -- Timestamps
+	// (creator and last modified user_id/time)
+	#[serde_as(as = "Rfc3339")]
+	pub creation_time: OffsetDateTime,
+	#[serde_as(as = "Rfc3339")]
+	pub updated_time: OffsetDateTime,
 }
 
-#[derive(Deserialize)]
+#[derive(Fields, Deserialize, Default)]
 pub struct CommentForCreate {
-	pub article_id: i32,
+	pub article_id: i64,
 	pub user_id: i64,
 	pub content: String,
+	#[field(cast_as = "comment_type")]
+	pub comment_type: CommentType,
+	pub replay_to: Option<i64>,
 }
 
-#[derive(Fields)]
-pub struct CommentForInsert {
-	pub article_id: i32,
-	pub user_id: i64,
-	pub content: String,
-}
-
-#[derive(Clone, FromRow, Fields, Debug)]
+#[derive(Fields, Deserialize, Default)]
 pub struct CommentForUpdate {
-	pub article_id: i32,
-	pub user_id: i64,
-	pub content: String,
+	pub content: Option<String>,
+	// Add other fields for update if needed
 }
 
-/// Marker trait
-pub trait CommentBy: HasFields + for<'r> FromRow<'r, PgRow> + Unpin + Send {}
-
-impl CommentBy for Comment {}
-
-// Note: Since the entity properties Iden will be given by modql
-//       CommentIden does not have to be exhaustive, but just have the columns
-//       we use in our specific code.
-#[derive(Iden)]
-enum CommentIden {
-	Id,
-	ArticleId,
-	UserId,
-	Content,
-}
-
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+#[derive(FilterNodes, Deserialize, Default)]
 pub struct CommentFilter {
-	pub id: Option<OpValsInt32>,
-	pub article_id: Option<OpValsInt32>,
+	pub id: Option<OpValsInt64>,
+	pub article_id: Option<OpValsInt64>,
 	pub user_id: Option<OpValsInt64>,
 	pub content: Option<OpValsString>,
+	pub comment_type: Option<OpValsString>,
+	pub replay_to: Option<OpValsInt64>,
+	#[modql(to_sea_value_fn = "time_to_sea_value")]
+	pub creation_time: Option<OpValsValue>,
 }
+
 // endregion: --- Comment Types
 
 // region:    --- CommentBmc
+
 pub struct CommentBmc;
 
 impl DbBmc for CommentBmc {
-	const TABLE: &'static str = "comments";
+	const TABLE: &'static str = "comment";
 }
 
-impl CommentBmc {
-	pub async fn create(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		comment_c: CommentForCreate,
-	) -> Result<i64> {
-		// Start the transaction
-		let mm = mm.new_with_txn()?;
-		mm.dbx().begin_txn().await?;
+// This will generate the `impl CommentBmc {...}` with the default CRUD functions.
+generate_common_bmc_fns!(
+		Bmc: CommentBmc,
+		Entity: Comment,
+		ForCreate: CommentForCreate,
+		ForUpdate: CommentForUpdate,
+		Filter: CommentFilter,
+);
 
-		// Create the comment row
-		let comment_fi = CommentForInsert { ..comment_c };
+// endregion: --- CommentBmc
 
-		let comment_id = base::create::<Self, _>(ctx, &mm, comment_fi)
-			.await
-			.map_err(|e| Error::from(e))?;
-
-		// Commit the transaction
-		mm.dbx().commit_txn().await?;
-
-		Ok(comment_id)
-	}
-
-	pub async fn get<E>(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<E>
-	where
-		E: CommentBy,
-	{
-		base::get::<Self, _>(ctx, mm, id).await
-	}
-
-	pub async fn list(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		filter: Option<Vec<CommentFilter>>,
-		list_options: Option<ListOptions>,
-	) -> Result<Vec<Comment>> {
-		base::list::<Self, _, _>(ctx, mm, filter, list_options).await
-	}
-
-	pub async fn update(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		id: i64,
-		comment: CommentForCreate,
-	) -> Result<()> {
-		// Start the transaction
-		let mm = mm.new_with_txn()?;
-		mm.dbx().begin_txn().await?;
-
-		// Update the comment
-		let comment_fi = CommentForInsert { ..comment };
-		base::update::<Self, _>(ctx, &mm, id, comment_fi).await?;
-
-		// Commit the transaction
-		mm.dbx().commit_txn().await?;
-
-		Ok(())
-	}
-
-	pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
-		base::delete::<Self>(ctx, mm, id).await
-	}
-}
-// endregion:    --- CommentBmc
-
-// region:    --- Comment Tests
+// region:    --- Tests
 #[cfg(test)]
 mod tests {
-	pub type Result<T> = core::result::Result<T, Error>;
-	pub type Error = Box<dyn std::error::Error>; // For tests.
+
+	type Error = Box<dyn std::error::Error>;
+	type Result<T> = core::result::Result<T, Error>;
 
 	use super::*;
-	use crate::_dev_utils;
+	use crate::_dev_utils::{self, clean_comments, seed_comment};
+
 	use serial_test::serial;
 
-	#[serial]
 	#[tokio::test]
+	#[serial]
 	async fn test_create_ok() -> Result<()> {
 		// -- Setup & Fixtures
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
-		let fx_article_id = 1000; // Specify the article_id accordingly
-		let fx_user_id = 1000; // Specify the user_id accordingly
-		let fx_content = "Test comment content";
+		let fx_article_id = 1; // Example article ID
+		let fx_user_id = 1000; // Example user ID
+		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+		let fx_comment_type = CommentType::General;
+		let fx_replay_to = None; // Example replay_to ID
 
 		// -- Exec
-		let comment_id = CommentBmc::create(
-			&ctx,
-			&mm,
-			CommentForCreate {
-				article_id: fx_article_id,
-				user_id: fx_user_id,
-				content: fx_content.to_string(),
-			},
-		)
-		.await?;
+		let fx_comment_c = CommentForCreate {
+			article_id: fx_article_id,
+			user_id: fx_user_id,
+			content: fx_content.to_string(),
+			comment_type: fx_comment_type,
+			replay_to: fx_replay_to,
+		};
+		let comment_id = CommentBmc::create(&ctx, &mm, fx_comment_c).await?;
 
 		// -- Check
-		let comment: Comment = CommentBmc::get(&ctx, &mm, comment_id).await?;
+		let comment = CommentBmc::get(&ctx, &mm, comment_id).await?;
 		assert_eq!(comment.article_id, fx_article_id);
 		assert_eq!(comment.user_id, fx_user_id);
 		assert_eq!(comment.content, fx_content);
+		assert_eq!(comment.comment_type, fx_comment_type);
+		assert_eq!(comment.replay_to, fx_replay_to);
 
 		// -- Clean
-		CommentBmc::delete(&ctx, &mm, comment_id).await?;
+		let count = clean_comments(&ctx, &mm, "test_create_ok").await?;
+		assert_eq!(count, 1, "Should have cleaned only 1 comment");
 
 		Ok(())
 	}
 
-	// Add more test cases as needed
+	#[tokio::test]
+	#[serial]
+	async fn test_update_ok() -> Result<()> {
+		// -- Setup & Fixtures
+		let mm = _dev_utils::init_test().await;
+		let ctx = Ctx::root_ctx();
+		let fx_article_id = 1; // Example article ID
+		let fx_user_id = 1000; // Example user ID
+		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+		let fx_comment_type = CommentType::General;
+		let fx_replay_to = None; // Example replay_to ID
+
+		let fx_comment_id = seed_comment(
+			&ctx,
+			&mm,
+			fx_article_id,
+			fx_user_id,
+			fx_content,
+			fx_comment_type,
+			fx_replay_to,
+		)
+		.await?;
+
+		let fx_content_updated = "Updated content.";
+		// Example updated replay_to ID
+
+		// -- Exec
+		let fx_comment_u = CommentForUpdate {
+			content: Some(fx_content_updated.to_string()),
+			..Default::default()
+		};
+		CommentBmc::update(&ctx, &mm, fx_comment_id, fx_comment_u).await?;
+
+		// -- Check
+		let comment = CommentBmc::get(&ctx, &mm, fx_comment_id).await?;
+		assert_eq!(comment.content, fx_content_updated);
+
+		// -- Clean
+		let count = clean_comments(&ctx, &mm, "test_update_ok").await?;
+		assert_eq!(count, 1, "Should have cleaned only 1 comment");
+
+		Ok(())
+	}
+
+	// Add other test cases as needed...
 }
-// endregion: --- Comment Tests
+
+// endregion:    --- Tests
