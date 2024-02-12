@@ -7,6 +7,7 @@ mod comment_seed;
 mod conv_seed;
 mod dev_db;
 mod user_seed;
+mod subscription_seed;
 
 use crate::model::ModelManager;
 
@@ -20,6 +21,7 @@ pub use crate::_dev_utils::author_seed::*;
 pub use crate::_dev_utils::comment_seed::*;
 pub use crate::_dev_utils::conv_seed::*;
 pub use crate::_dev_utils::user_seed::*;
+pub use crate::_dev_utils::subscription_seed::*;
 
 // endregion: --- Modules
 

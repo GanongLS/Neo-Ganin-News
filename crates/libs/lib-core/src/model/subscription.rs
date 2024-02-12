@@ -1,60 +1,65 @@
 use crate::ctx::Ctx;
-use crate::model::base::{self, prep_fields_for_update, DbBmc};
-use crate::model::modql_utils::time_to_sea_value;
-use crate::model::ModelManager;
-use crate::model::{Error, Result};
-use modql::field::{Field, Fields, HasFields};
-use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue};
-use sea_query::{Expr, Iden, PostgresQueryBuilder, Query};
-use sea_query_binder::SqlxBinder;
+use crate::generate_common_bmc_fns;
+use crate::model::{
+	base::{self, DbBmc},
+	ModelManager, Result,
+};
+
+use modql::{
+	field::Fields,
+	filter::{FilterNodes, ListOptions, OpValsInt64, OpValsValue},
+};
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::FromRow;
-use uuid::Uuid;
+use serde_with::serde_as;
+
+use lib_utils::time::Rfc3339;
+use sqlx::{types::time::OffsetDateTime, FromRow};
 
 // region:    --- Subscription Types
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde_as]
+#[derive(Clone, Debug, Fields, FromRow, Serialize)]
 pub struct Subscription {
+	// Main field
 	pub id: i64,
 	pub subscriber: i64,
-	pub subscription_content: String,
-	pub subscription_start_time: chrono::DateTime<chrono::Utc>,
-	pub subscription_end_time: chrono::DateTime<chrono::Utc>,
+	pub author_id: i64,
+	#[serde_as(as = "Rfc3339")]
+	pub subscription_start_time: OffsetDateTime,
+	#[serde_as(as = "Rfc3339")]
+	pub subscription_end_time: OffsetDateTime,
+
+	// -- Timestamps
+	// (creator and last modified user_id/time)
+	pub creator_id: i64,
+	#[serde_as(as = "Rfc3339")]
+	pub creation_time: OffsetDateTime,
+	pub updater_id: i64,
+	#[serde_as(as = "Rfc3339")]
+	pub updated_time: OffsetDateTime,
 }
 
-#[derive(Deserialize)]
+#[derive(Fields, Deserialize, Default)]
 pub struct SubscriptionForCreate {
 	pub subscriber: i64,
-	pub subscription_content: String,
-	// Add other fields as needed
+	pub author_id: i64,
+	pub subscription_start_time: Option<OffsetDateTime>,
+	pub subscription_end_time: Option<OffsetDateTime>,
 }
 
-#[derive(Fields)]
-pub struct SubscriptionForInsert {
-	pub subscriber: i64,
-	pub subscription_content: String,
-	// Add other fields as needed
+#[derive(Fields, Deserialize, Default)]
+pub struct SubscriptionForUpdate {
+	pub subscriber: Option<i64>,
+	pub author_id: Option<i64>,
+	pub subscription_start_time: Option<OffsetDateTime>,
+	pub subscription_end_time: Option<OffsetDateTime>,
 }
 
-#[derive(Clone, Debug, FromRow, Fields, Serialize)]
-pub struct SubscriptionForList {
-	pub id: i64,
-	pub subscriber: i64,
-	pub subscription_content: String,
-	pub subscription_start_time: chrono::DateTime<chrono::Utc>,
-	pub subscription_end_time: chrono::DateTime<chrono::Utc>,
-	// Add other fields as needed
+#[derive(FilterNodes, Deserialize, Default)]
+pub struct SubscriptionFilter {
+	pub id: Option<OpValsValue>,
+	pub subscriber: Option<OpValsValue>,
+	pub author_id: Option<OpValsInt64>,
 }
-
-/// Marker trait
-pub trait SubscriptionBy:
-	HasFields + for<'r> FromRow<'r, PgRow> + Unpin + Send
-{
-}
-
-impl SubscriptionBy for Subscription {}
-impl SubscriptionBy for SubscriptionForList {}
 
 // endregion: --- Subscription Types
 
@@ -66,70 +71,104 @@ impl DbBmc for SubscriptionBmc {
 	const TABLE: &'static str = "subscription";
 }
 
-impl SubscriptionBmc {
-	pub async fn create(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		subscription_c: SubscriptionForCreate,
-	) -> Result<i64> {
-		// Start the transaction
-		let mm = mm.new_with_txn()?;
-		mm.dbx().begin_txn().await?;
+// This will generate the `impl SubscriptionBmc {...}` with the default CRUD functions.
+generate_common_bmc_fns!(
+		Bmc: SubscriptionBmc,
+		Entity: Subscription,
+		ForCreate: SubscriptionForCreate,
+		ForUpdate: SubscriptionForUpdate,
+		Filter: SubscriptionFilter,
+);
 
-		// Create the subscription row
-		let subscription_fi = SubscriptionForInsert {
-			subscriber: subscription_c.subscriber,
-			subscription_content: subscription_c.subscription_content,
-		};
+// endregion: --- SubscriptionBmc
 
-		let subscription_id = base::create::<Self, _>(ctx, &mm, subscription_fi).await?;
+// region:    --- Tests
 
-		// Commit the transaction
-		mm.dbx().commit_txn().await?;
+#[cfg(test)]
+mod tests {
+	type Error = Box<dyn std::error::Error>;
+	type Result<T> = core::result::Result<T, Error>; // For tests.
 
-		Ok(subscription_id)
-	}
+	use super::*;
+	use crate::_dev_utils::{self, clean_subscriptions};
+	use serial_test::serial;
 
-	pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Subscription> {
-		base::get::<Self, _>(ctx, mm, id).await
-	}
+	#[tokio::test]
+	#[serial]
+	async fn test_create_ok() -> Result<()> {
+		// -- Setup & Fixtures
+		let mm = _dev_utils::init_test().await;
+		let ctx = Ctx::root_ctx();
 
-	pub async fn update(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		id: i64,
-		subscription: SubscriptionForCreate,
-	) -> Result<()> {
-		// Start the transaction
-		let mm = mm.new_with_txn()?;
-		mm.dbx().begin_txn().await?;
+		let subscriber_id = 1000; // Example subscriber ID
+		let author_id = 2000; // Example author ID
 
-		// Update the subscription
-		let subscription_fi = SubscriptionForInsert {
-			subscriber: subscription.subscriber,
-			subscription_content: subscription.subscription_content,
-		};
+		// -- Exec
+		let subscription_id = SubscriptionBmc::create(
+			&ctx,
+			&mm,
+			SubscriptionForCreate {
+				subscriber: subscriber_id,
+				author_id,
+				subscription_start_time: None,
+				subscription_end_time: None,
+			},
+		)
+		.await?;
 
-		base::update::<Self, _>(ctx, &mm, id, subscription_fi).await?;
+		// -- Check
+		let subscription = SubscriptionBmc::get(&ctx, &mm, subscription_id).await?;
+		assert_eq!(subscription.subscriber, subscriber_id);
+		assert_eq!(subscription.author_id, author_id);
 
-		// Commit the transaction
-		mm.dbx().commit_txn().await?;
+		// -- Clean
+		let count = clean_subscriptions(&ctx, &mm).await?;
+		assert_eq!(count, 1, "Should have cleaned only 1 subscription");
 
 		Ok(())
 	}
 
-	pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
-		base::delete::<Self>(ctx, mm, id).await
-	}
+	#[tokio::test]
+	#[serial]
+	async fn test_update_ok() -> Result<()> {
+		// -- Setup & Fixtures
+		let mm = _dev_utils::init_test().await;
+		let ctx = Ctx::root_ctx();
 
-	pub async fn list(
-		ctx: &Ctx,
-		mm: &ModelManager,
-		filter: Option<Vec<SubscriptionFilter>>,
-		list_options: Option<ListOptions>,
-	) -> Result<Vec<SubscriptionForList>> {
-		base::list::<Self, _, SubscriptionForList>(ctx, mm, filter, list_options).await
+		let subscriber_id = 1000; // Example subscriber ID
+		let author_id = 2000; // Example author ID
+
+		let subscription_id = SubscriptionBmc::create(
+			&ctx,
+			&mm,
+			SubscriptionForCreate {
+				subscriber: subscriber_id,
+				author_id,
+				subscription_start_time: None,
+				subscription_end_time: None,
+			},
+		)
+		.await?;
+
+		let updated_author_id = 3000; // Updated author ID
+
+		// -- Exec
+		let subscription_u = SubscriptionForUpdate {
+			author_id: Some(updated_author_id),
+			..Default::default()
+		};
+		SubscriptionBmc::update(&ctx, &mm, subscription_id, subscription_u).await?;
+
+		// -- Check
+		let subscription = SubscriptionBmc::get(&ctx, &mm, subscription_id).await?;
+		assert_eq!(subscription.author_id, updated_author_id);
+
+		// -- Clean
+		let count = clean_subscriptions(&ctx, &mm).await?;
+		assert_eq!(count, 1, "Should have cleaned only 1 subscription");
+
+		Ok(())
 	}
 }
 
-// endregion:    --- SubscriptionBmc
+// endregion: --- Tests

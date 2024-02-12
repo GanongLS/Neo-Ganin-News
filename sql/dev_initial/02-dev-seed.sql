@@ -409,25 +409,25 @@ VALUES (
 
 INSERT INTO subscription (
     subscriber,
-    subscription_content,
+    author_id,
     subscription_start_time,
     subscription_end_time
   )
 VALUES (
     1000,
-    'Subscription content 1',
+    1001,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP + INTERVAL '1 year'
   ),
   (
     1002,
-    'Subscription content 2',
+    1001,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP + INTERVAL '1 year'
   ),
   (
     1001,
-    'Subscription content 3',
+    1001,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP + INTERVAL '1 year'
   );
@@ -435,7 +435,7 @@ VALUES (
 -- Subscription 1,2,3
 INSERT INTO subscription (
     subscriber,
-    subscription_content,
+    author_id,
     subscription_start_time,
     subscription_end_time,
     creation_time,
@@ -447,7 +447,7 @@ VALUES (
     /* subscriber */
     1000,
     /* subscription_content */
-    'Subscription 1 content',
+    1001,
     /* subscription_start_time */
     CURRENT_TIMESTAMP,
     /* subscription_end_time */
@@ -465,7 +465,7 @@ VALUES (
     /* subscriber */
     1001,
     /* subscription_content */
-    'Subscription 2 content',
+    1001,
     /* subscription_start_time */
     CURRENT_TIMESTAMP,
     /* subscription_end_time */
@@ -483,7 +483,7 @@ VALUES (
     /* subscriber */
     1002,
     /* subscription_content */
-    'Subscription 3 content',
+    1001,
     /* subscription_start_time */
     CURRENT_TIMESTAMP,
     /* subscription_end_time */
