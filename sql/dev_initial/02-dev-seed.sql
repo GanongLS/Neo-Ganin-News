@@ -114,22 +114,23 @@ VALUES (
     NOW(),
     0,
     0
-  ),(
-  (
-    SELECT id
-    FROM "user"
-    WHERE username = 'demo3'
   ),
-  'Editor',
-  'JaneS',
-  'Author bio goes here',
-  'http://example.com',
-  'http://example.com/avatar.jpg',
-  NOW(),
-  NOW(),
-  0,
-  0
-);
+  (
+    (
+      SELECT id
+      FROM "user"
+      WHERE username = 'demo3'
+    ),
+    'Editor',
+    'JaneS',
+    'Author bio goes here',
+    'http://example.com',
+    'http://example.com/avatar.jpg',
+    NOW(),
+    NOW(),
+    0,
+    0
+  );
 
 -- Categories
 INSERT INTO category (
@@ -269,16 +270,12 @@ INSERT INTO article (
     content,
     category_id,
     author_id,
-    -- art_version, 
     approval_state,
     approver_id,
     approval_time,
-    -- publication_date,
-    -- tags,
-    -- is_featured,
-    views,
+    -- views,
     image_url,
-    likes,
+    -- likes,
     creation_time,
     updated_time,
     creator_id,
@@ -292,9 +289,7 @@ VALUES (
     'Draft',
     NULL,
     NULL,
-    0,
     NULL,
-    0,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     1000,
@@ -308,9 +303,7 @@ VALUES (
     'Draft',
     NULL,
     NULL,
-    0,
     NULL,
-    0,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     1001,
@@ -324,9 +317,21 @@ VALUES (
     'Draft',
     NULL,
     NULL,
-    0,
     NULL,
-    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP,
+    1002,
+    1002 -- creator_id and updater_id
+  ),
+  (
+    'Title of Article 4',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor tortor vitae mi sodales, vitae rhoncus elit suscipit. Nulla vel orci eu metus vestibulum malesuada et ac ex.',
+    1000,
+    1002,
+    'Draft',
+    NULL,
+    NULL,
+    NULL,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP,
     1002,
@@ -491,4 +496,45 @@ VALUES (
     0,
     /* updater_id */
     0
+  );
+
+INSERT INTO article_accessory (
+    article_id,
+    views,
+    likes,
+    dislikes,
+    creator_id,
+    updater_id,
+    creation_time,
+    updated_time
+  )
+VALUES (
+    1000,
+    100,
+    50,
+    10,
+    0,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ),
+  (
+    1001,
+    100,
+    50,
+    10,
+    0,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+  ),
+  (
+    1002,
+    50,
+    20,
+    5,
+    0,
+    0,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
   );

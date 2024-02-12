@@ -67,9 +67,7 @@ pub struct Article {
 	pub approval_time: Option<OffsetDateTime>, // Nullable
 
 	// non mandatory
-	pub views: i32,
 	pub image_url: Option<String>, // Nullable
-	pub likes: i32,
 
 	// -- Timestamps
 	// (creator and last modified user_id/time)
