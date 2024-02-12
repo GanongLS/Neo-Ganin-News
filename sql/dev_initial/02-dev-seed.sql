@@ -73,7 +73,7 @@ VALUES (
 -- Create authors associated with the newly inserted users
 INSERT INTO author (
     user_id,
-    typ,
+    author_type,
     pen_name,
     bio,
     website,
@@ -87,7 +87,7 @@ VALUES (
     (
       SELECT id
       FROM "user"
-      WHERE username = 'demo2'
+      WHERE username = 'demo1'
     ),
     'Journalist',
     'JohnD',
@@ -103,7 +103,7 @@ VALUES (
     (
       SELECT id
       FROM "user"
-      WHERE username = 'demo3'
+      WHERE username = 'demo2'
     ),
     'Editor',
     'JaneS',
@@ -114,7 +114,22 @@ VALUES (
     NOW(),
     0,
     0
-  );
+  ),(
+  (
+    SELECT id
+    FROM "user"
+    WHERE username = 'demo3'
+  ),
+  'Editor',
+  'JaneS',
+  'Author bio goes here',
+  'http://example.com',
+  'http://example.com/avatar.jpg',
+  NOW(),
+  NOW(),
+  0,
+  0
+);
 
 -- Categories
 INSERT INTO category (

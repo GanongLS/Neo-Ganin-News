@@ -1,9 +1,11 @@
 use crate::ctx::Ctx;
 use crate::generate_common_bmc_fns;
-use crate::model::base::{self, DbBmc};
-use crate::model::modql_utils::time_to_sea_value;
-use crate::model::ModelManager;
-use crate::model::Result;
+use crate::model::{
+	base::{self, DbBmc},
+	modql_utils::time_to_sea_value,
+	ModelManager, Result,
+};
+
 use modql::{
 	field::Fields,
 	filter::{
@@ -29,6 +31,8 @@ pub enum ApprovalState {
 	RequestApproval,
 	ApprovalPending,
 	Approved,
+	NeedCorrection,
+	Reject,
 }
 
 impl From<ApprovalState> for sea_query::Value {
@@ -37,7 +41,6 @@ impl From<ApprovalState> for sea_query::Value {
 	}
 }
 
-// untuk value default
 /// Note: This is required for sea::query in case of None.
 ///       However, in this codebase, we utilize the modql not_none_field,
 ///       so this will be disregarded anyway.
@@ -95,7 +98,10 @@ pub struct ArticleForUpdate {
 	pub content: Option<String>,
 	pub category_id: Option<i32>,
 	pub views: Option<i32>,
+	#[field(cast_as = "approval_state")]
+	pub approval_state: ApprovalState,
 	pub image_url: Option<String>,
+	// article views, likes, reaction, comments itu masuknya article accessories
 	pub likes: Option<i32>,
 }
 

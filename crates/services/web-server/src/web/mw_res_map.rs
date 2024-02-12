@@ -58,7 +58,7 @@ pub async fn mw_reponse_map(
 	// -- Build and log the server log line.
 	let client_error = client_status_error.unzip().1;
 
-	// TODO: Need to hander if log_request fail (but should not fail request)
+	// TODO: Need to handle if log_request fail (but should not fail request)
 	let _ = log_request(
 		req_method,
 		uri,

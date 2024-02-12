@@ -1,10 +1,11 @@
 // region:    --- Modules
 
 mod agent_test;
-mod article_test;
-mod conv_test;
+mod article_seed;
+mod author_seed;
+mod conv_seed;
 mod dev_db;
-mod user_test;
+mod user_seed;
 
 use crate::model::ModelManager;
 
@@ -13,9 +14,10 @@ use tracing::info;
 
 // exporting
 pub use crate::_dev_utils::agent_test::*;
-pub use crate::_dev_utils::article_test::*;
-pub use crate::_dev_utils::conv_test::*;
-pub use crate::_dev_utils::user_test::*;
+pub use crate::_dev_utils::article_seed::*;
+pub use crate::_dev_utils::author_seed::*;
+pub use crate::_dev_utils::conv_seed::*;
+pub use crate::_dev_utils::user_seed::*;
 
 // endregion: --- Modules
 
