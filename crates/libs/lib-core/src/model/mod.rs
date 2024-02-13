@@ -34,6 +34,7 @@ pub mod conv_user;
 pub mod modql_utils;
 pub mod subscription;
 pub mod user;
+pub mod article_view;
 
 pub use self::error::{Error, Result};
 

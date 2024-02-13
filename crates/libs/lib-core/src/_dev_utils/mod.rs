@@ -2,12 +2,13 @@
 
 mod agent_seed;
 mod article_seed;
+mod article_view_seed;
 mod author_seed;
 mod comment_seed;
 mod conv_seed;
 mod dev_db;
-mod user_seed;
 mod subscription_seed;
+mod user_seed;
 
 use crate::model::ModelManager;
 
@@ -17,11 +18,12 @@ use tracing::info;
 // exporting
 pub use crate::_dev_utils::agent_seed::*;
 pub use crate::_dev_utils::article_seed::*;
+pub use crate::_dev_utils::article_view_seed::*;
 pub use crate::_dev_utils::author_seed::*;
 pub use crate::_dev_utils::comment_seed::*;
 pub use crate::_dev_utils::conv_seed::*;
-pub use crate::_dev_utils::user_seed::*;
 pub use crate::_dev_utils::subscription_seed::*;
+pub use crate::_dev_utils::user_seed::*;
 
 // endregion: --- Modules
 
