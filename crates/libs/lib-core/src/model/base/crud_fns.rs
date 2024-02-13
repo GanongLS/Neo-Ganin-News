@@ -12,6 +12,7 @@ use sea_query_binder::SqlxBinder;
 use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 
+// ini perlu dibuat agar returnnya bisa i32 dan i64
 pub async fn create<MC, E>(ctx: &Ctx, mm: &ModelManager, data: E) -> Result<i64>
 where
 	MC: DbBmc,
@@ -90,8 +91,7 @@ where
 
 			// Don't change order_bys if not empty,
 			// otherwise, set it to id (creation asc order)
-			list_options.order_bys =
-				list_options.order_bys.or_else(|| Some("id".into()));
+			list_options.order_bys = list_options.order_bys.or_else(|| Some("id".into()));
 
 			list_options
 		}
@@ -142,12 +142,7 @@ where
 	Ok(entities)
 }
 
-pub async fn update<MC, E>(
-	ctx: &Ctx,
-	mm: &ModelManager,
-	id: i64,
-	data: E,
-) -> Result<()>
+pub async fn update<MC, E>(ctx: &Ctx, mm: &ModelManager, id: i64, data: E) -> Result<()>
 where
 	MC: DbBmc,
 	E: HasFields,
@@ -206,9 +201,7 @@ where
 	}
 }
 
-pub fn compute_list_options(
-	list_options: Option<ListOptions>,
-) -> Result<ListOptions> {
+pub fn compute_list_options(list_options: Option<ListOptions>) -> Result<ListOptions> {
 	if let Some(mut list_options) = list_options {
 		// Validate the limit.
 		if let Some(limit) = list_options.limit {

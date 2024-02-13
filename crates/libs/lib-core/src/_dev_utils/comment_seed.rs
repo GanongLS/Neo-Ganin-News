@@ -1,7 +1,7 @@
 use modql::filter::OpValString;
 
 use crate::ctx::Ctx;
-use crate::model::comment::{CommentBmc, CommentFilter, CommentForCreate, CommentType};
+use crate::model::comment::{CommentBmc, CommentFilter, CommentForCreate};
 use crate::model::{self, ModelManager};
 
 // region:    --- Comment seed/clean
@@ -9,21 +9,12 @@ use crate::model::{self, ModelManager};
 pub async fn seed_comments(
 	ctx: &Ctx,
 	mm: &ModelManager,
-	data: &[(i64, i64, &str, CommentType, Option<i64>)],
+	data: &[(i64, i64, &str, Option<i64>)],
 ) -> model::Result<Vec<i64>> {
 	let mut ids = Vec::new();
 
-	for (article_id, user_id, content, comment_type, replay_to) in data {
-		let id = seed_comment(
-			ctx,
-			mm,
-			*article_id,
-			*user_id,
-			*content,
-			*comment_type,
-			*replay_to,
-		)
-		.await?;
+	for (article_id, user_id, content, replay_to) in data {
+		let id = seed_comment(ctx, mm, *article_id, *user_id, *content, *replay_to).await?;
 		ids.push(id);
 	}
 
@@ -36,7 +27,7 @@ pub async fn seed_comment(
 	article_id: i64,
 	user_id: i64,
 	content: &str,
-	comment_type: CommentType,
+
 	replay_to: Option<i64>,
 ) -> model::Result<i64> {
 	CommentBmc::create(
@@ -46,7 +37,7 @@ pub async fn seed_comment(
 			article_id,
 			user_id,
 			content: content.to_string(),
-			comment_type,
+
 			replay_to,
 		},
 	)

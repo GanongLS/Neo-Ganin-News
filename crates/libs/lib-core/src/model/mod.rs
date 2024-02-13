@@ -26,7 +26,9 @@ mod store;
 
 pub mod agent;
 pub mod article;
+pub mod article_view;
 pub mod author;
+pub mod category;
 pub mod comment;
 pub mod conv;
 pub mod conv_msg;
@@ -34,7 +36,6 @@ pub mod conv_user;
 pub mod modql_utils;
 pub mod subscription;
 pub mod user;
-pub mod article_view;
 
 pub use self::error::{Error, Result};
 

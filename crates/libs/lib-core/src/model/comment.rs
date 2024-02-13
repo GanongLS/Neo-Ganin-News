@@ -10,7 +10,7 @@ use modql::{
 	field::Fields,
 	filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString, OpValsValue},
 };
-use sea_query::Nullable;
+
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 
@@ -18,32 +18,6 @@ use lib_utils::time::Rfc3339;
 use sqlx::{types::time::OffsetDateTime, FromRow};
 
 // region:    --- Comment Types
-#[derive(
-	Copy, Clone, Debug, sqlx::Type, derive_more::Display, Deserialize, Serialize, Default,
-)]
-#[sqlx(type_name = "comment_type")]
-#[cfg_attr(test, derive(PartialEq))]
-pub enum CommentType {
-	#[default]
-	General,
-	Replay,
-}
-
-impl From<CommentType> for sea_query::Value {
-	fn from(val: CommentType) -> Self {
-		val.to_string().into()
-	}
-}
-
-/// Note: This is required for sea::query in case of None.
-///       However, in this codebase, we utilize the modql not_none_field,
-///       so this will be disregarded anyway.
-///       Nonetheless, it's still necessary for compilation.
-impl Nullable for CommentType {
-	fn null() -> sea_query::Value {
-		CommentType::General.into()
-	}
-}
 
 #[serde_as]
 #[derive(Clone, Debug, Fields, FromRow, Serialize)]
@@ -53,7 +27,7 @@ pub struct Comment {
 	pub article_id: i64,
 	pub user_id: i64,
 	pub content: String,
-	pub comment_type: CommentType,
+  // if null then the comment are article root comment, if there then it is a replay to a comment, 
 	pub replay_to: Option<i64>, // Nullable
 
 	// -- Timestamps
@@ -69,8 +43,6 @@ pub struct CommentForCreate {
 	pub article_id: i64,
 	pub user_id: i64,
 	pub content: String,
-	#[field(cast_as = "comment_type")]
-	pub comment_type: CommentType,
 	pub replay_to: Option<i64>,
 }
 
@@ -86,7 +58,7 @@ pub struct CommentFilter {
 	pub article_id: Option<OpValsInt64>,
 	pub user_id: Option<OpValsInt64>,
 	pub content: Option<OpValsString>,
-	pub comment_type: Option<OpValsString>,
+
 	pub replay_to: Option<OpValsInt64>,
 	#[modql(to_sea_value_fn = "time_to_sea_value")]
 	pub creation_time: Option<OpValsValue>,
@@ -134,7 +106,6 @@ mod tests {
 		let fx_article_id = 1; // Example article ID
 		let fx_user_id = 1000; // Example user ID
 		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-		let fx_comment_type = CommentType::General;
 		let fx_replay_to = None; // Example replay_to ID
 
 		// -- Exec
@@ -142,7 +113,6 @@ mod tests {
 			article_id: fx_article_id,
 			user_id: fx_user_id,
 			content: fx_content.to_string(),
-			comment_type: fx_comment_type,
 			replay_to: fx_replay_to,
 		};
 		let comment_id = CommentBmc::create(&ctx, &mm, fx_comment_c).await?;
@@ -152,7 +122,6 @@ mod tests {
 		assert_eq!(comment.article_id, fx_article_id);
 		assert_eq!(comment.user_id, fx_user_id);
 		assert_eq!(comment.content, fx_content);
-		assert_eq!(comment.comment_type, fx_comment_type);
 		assert_eq!(comment.replay_to, fx_replay_to);
 
 		// -- Clean
@@ -171,7 +140,6 @@ mod tests {
 		let fx_article_id = 1; // Example article ID
 		let fx_user_id = 1000; // Example user ID
 		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-		let fx_comment_type = CommentType::General;
 		let fx_replay_to = None; // Example replay_to ID
 
 		let fx_comment_id = seed_comment(
@@ -180,7 +148,6 @@ mod tests {
 			fx_article_id,
 			fx_user_id,
 			fx_content,
-			fx_comment_type,
 			fx_replay_to,
 		)
 		.await?;
