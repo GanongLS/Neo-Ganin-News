@@ -207,15 +207,18 @@ mod tests {
 		let fx_approval_state = ApprovalState::Draft;
 		let fx_image_url = Some("https://example.com/image.jpg".to_string());
 
+		let category_id = Some(1001); // Provide a valid category ID
+
+		// Seed the article data with a valid category ID
 		let fx_article_id = seed_article(
 			&ctx,
 			&mm,
 			fx_title,
 			fx_content,
-			None,
+			category_id,
 			fx_author_id,
 			fx_approval_state,
-			fx_image_url,
+			fx_image_url.clone(),
 		)
 		.await?;
 
@@ -297,8 +300,8 @@ mod tests {
 
 		let fx_titles = &["test_first_ok article 01", "test_first_ok article 02"];
 		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-		let fx_category_id = Some(123); // Example category ID
-		let fx_author_id = 456; // Example author ID
+		let fx_category_id = Some(1001); // Example category ID
+		let fx_author_id = 1000; // Example author ID
 		let fx_approval_state = ApprovalState::Draft;
 		let fx_image_url = Some("https://example.com/image.jpg".to_string());
 
@@ -349,8 +352,8 @@ mod tests {
 			"test_list_ok article 03",
 		];
 		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-		let fx_category_id = Some(123); // Example category ID
-		let fx_author_id = 456; // Example author ID
+		let fx_category_id = Some(1001); // Example category ID
+		let fx_author_id = 1001; // Example author ID
 		let fx_approval_state = ApprovalState::Draft;
 		let fx_image_url = Some("https://example.com/image.jpg".to_string());
 

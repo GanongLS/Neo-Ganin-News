@@ -498,7 +498,7 @@ VALUES (
     0
   );
 
-INSERT INTO article_views (
+INSERT INTO article_view (
     article_id,
     viewer_id,
     likes,
