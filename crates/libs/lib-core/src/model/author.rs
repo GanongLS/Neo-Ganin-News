@@ -61,6 +61,7 @@ pub struct Author {
 #[derive(Fields, Deserialize, Default)]
 pub struct AuthorForCreate {
 	pub user_id: i64,
+	#[field(cast_as = "AUTHOR_TYPE")]
 	pub author_type: AuthorType,
 	pub pen_name: String,
 	pub bio: Option<String>,
@@ -71,6 +72,7 @@ pub struct AuthorForCreate {
 #[derive(Clone, Fields, Default)]
 pub struct AuthorForUpdate {
 	pub user_id: i64,
+	#[field(cast_as = "AUTHOR_TYPE")]
 	pub author_type: AuthorType,
 	pub pen_name: String,
 	pub bio: Option<String>,
@@ -127,7 +129,7 @@ mod tests {
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
 		let fx_pen_name = "test_create_ok author 01";
-		let fx_user_id = 1000;
+		let fx_user_id = 1003;
 		let fx_author_type = AuthorType::Editor;
 		let fx_bio = Some("Test bio".to_string());
 		let fx_website = Some("https://example.com".to_string());
@@ -167,7 +169,7 @@ mod tests {
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
 
-		let fx_user_id = 1000;
+		let fx_user_id = 1004;
 		let fx_pen_name = "test_update_ok author 01";
 		let fx_author_type = AuthorType::Editor;
 		let fx_bio = Some("Original Bio".to_string());

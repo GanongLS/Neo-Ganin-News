@@ -15,14 +15,14 @@ use uuid::Uuid;
 
 // region:    --- User Types
 #[derive(Clone, Debug, sqlx::Type, derive_more::Display, Deserialize, Serialize)]
-#[sqlx(type_name = "user_typ")]
-pub enum UserTyp {
+#[sqlx(type_name = "USER_TYPE")]
+pub enum UserType {
 	Sys,
 	User,
 }
 
-impl From<UserTyp> for sea_query::Value {
-	fn from(val: UserTyp) -> Self {
+impl From<UserType> for sea_query::Value {
+	fn from(val: UserType) -> Self {
 		val.to_string().into()
 	}
 }
@@ -34,7 +34,7 @@ pub struct User {
 	pub email: String,
 	pub first_name: String,
 	pub last_name: String,
-	pub typ: UserTyp,
+	pub user_type: UserType,
 }
 
 #[derive(Deserialize)]
