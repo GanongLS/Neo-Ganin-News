@@ -27,13 +27,15 @@ pub struct Comment {
 	pub article_id: i64,
 	pub user_id: i64,
 	pub content: String,
-  // if null then the comment are article root comment, if there then it is a replay to a comment, 
+	// if null then the comment are article root comment, if there then it is a replay to a comment,
 	pub replay_to: Option<i64>, // Nullable
 
 	// -- Timestamps
 	// (creator and last modified user_id/time)
+	pub creator_id: i64,
 	#[serde_as(as = "Rfc3339")]
 	pub creation_time: OffsetDateTime,
+	pub updater_id: i64,
 	#[serde_as(as = "Rfc3339")]
 	pub updated_time: OffsetDateTime,
 }
@@ -103,9 +105,9 @@ mod tests {
 		// -- Setup & Fixtures
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
-		let fx_article_id = 1; // Example article ID
+		let fx_article_id = 1001; // Example article ID
 		let fx_user_id = 1000; // Example user ID
-		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+		let fx_content = "comment test unit 1.";
 		let fx_replay_to = None; // Example replay_to ID
 
 		// -- Exec
@@ -125,7 +127,7 @@ mod tests {
 		assert_eq!(comment.replay_to, fx_replay_to);
 
 		// -- Clean
-		let count = clean_comments(&ctx, &mm, "test_create_ok").await?;
+		let count = clean_comments(&ctx, &mm, "comment test unit 1.").await?;
 		assert_eq!(count, 1, "Should have cleaned only 1 comment");
 
 		Ok(())
@@ -137,9 +139,9 @@ mod tests {
 		// -- Setup & Fixtures
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
-		let fx_article_id = 1; // Example article ID
+		let fx_article_id = 1001; // Example article ID
 		let fx_user_id = 1000; // Example user ID
-		let fx_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+		let fx_content = "Content comment update 1";
 		let fx_replay_to = None; // Example replay_to ID
 
 		let fx_comment_id = seed_comment(
@@ -152,7 +154,7 @@ mod tests {
 		)
 		.await?;
 
-		let fx_content_updated = "Updated content.";
+		let fx_content_updated = "Updated content. 01";
 		// Example updated replay_to ID
 
 		// -- Exec
@@ -167,7 +169,7 @@ mod tests {
 		assert_eq!(comment.content, fx_content_updated);
 
 		// -- Clean
-		let count = clean_comments(&ctx, &mm, "test_update_ok").await?;
+		let count = clean_comments(&ctx, &mm, "Updated content. 01").await?;
 		assert_eq!(count, 1, "Should have cleaned only 1 comment");
 
 		Ok(())
