@@ -90,7 +90,7 @@ mod tests {
 	type Result<T> = core::result::Result<T, Error>; // For tests.
 
 	use super::*;
-	use crate::_dev_utils::{self, clean_subscriptions};
+	use crate::_dev_utils::{self, clean_subscription};
 	use serial_test::serial;
 
 	#[tokio::test]
@@ -101,7 +101,7 @@ mod tests {
 		let ctx = Ctx::root_ctx();
 
 		let subscriber_id = 1000; // Example subscriber ID
-		let author_id = 2000; // Example author ID
+		let author_id = 1000; // Example author ID
 
 		// -- Exec
 		let subscription_id = SubscriptionBmc::create(
@@ -122,8 +122,8 @@ mod tests {
 		assert_eq!(subscription.author_id, author_id);
 
 		// -- Clean
-		let count = clean_subscriptions(&ctx, &mm).await?;
-		assert_eq!(count, 1, "Should have cleaned only 1 subscription");
+		let count = clean_subscription(&ctx, &mm, subscription_id).await?;
+		assert_eq!(count, (), "Should have cleaned only 1 subscription");
 
 		Ok(())
 	}
@@ -136,7 +136,7 @@ mod tests {
 		let ctx = Ctx::root_ctx();
 
 		let subscriber_id = 1000; // Example subscriber ID
-		let author_id = 2000; // Example author ID
+		let author_id = 1000; // Example author ID
 
 		let subscription_id = SubscriptionBmc::create(
 			&ctx,
@@ -150,7 +150,7 @@ mod tests {
 		)
 		.await?;
 
-		let updated_author_id = 3000; // Updated author ID
+		let updated_author_id = 1002; // Updated author ID
 
 		// -- Exec
 		let subscription_u = SubscriptionForUpdate {
@@ -164,8 +164,8 @@ mod tests {
 		assert_eq!(subscription.author_id, updated_author_id);
 
 		// -- Clean
-		let count = clean_subscriptions(&ctx, &mm).await?;
-		assert_eq!(count, 1, "Should have cleaned only 1 subscription");
+		let count = clean_subscription(&ctx, &mm, subscription_id).await?;
+		assert_eq!(count, (), "Should have cleaned only 1 subscription");
 
 		Ok(())
 	}

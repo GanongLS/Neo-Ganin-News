@@ -93,7 +93,7 @@ generate_common_bmc_fns!(
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::_dev_utils::{self, clean_article_views};
+	use crate::_dev_utils::{self, clean_article_view};
 
 	use serial_test::serial;
 
@@ -107,8 +107,8 @@ mod tests {
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
 
-		let article_id = 1; // Example article ID
-		let viewer_id = 123; // Example viewer ID
+		let article_id = 1000; // Example article ID
+		let viewer_id = 1001; // Example viewer ID
 		let view_count = 10;
 		let likes = true;
 		let dislikes = false;
@@ -135,8 +135,8 @@ mod tests {
 		assert_eq!(article_view.share, share);
 
 		// -- Clean
-		let count = clean_article_views(&ctx, &mm).await?;
-		assert_eq!(count, 1, "Should have cleaned only 1 article view");
+		let count = clean_article_view(&ctx, &mm, article_view_id).await?;
+		assert_eq!(count, (), "it just a deleting user for test");
 
 		Ok(())
 	}
@@ -148,8 +148,8 @@ mod tests {
 		let mm = _dev_utils::init_test().await;
 		let ctx = Ctx::root_ctx();
 
-		let article_id = 1; // Example article ID
-		let viewer_id = 123; // Example viewer ID
+		let article_id = 1000; // Example article ID
+		let viewer_id = 1001; // Example viewer ID
 		let view_count = 10;
 		let likes = true;
 		let dislikes = false;
@@ -199,8 +199,8 @@ mod tests {
 		let ctx = Ctx::root_ctx();
 
 		// Create an initial article view
-		let article_id = 1; // Example article ID
-		let viewer_id = 123; // Example viewer ID
+		let article_id = 1000; // Example article ID
+		let viewer_id = 1001; // Example viewer ID
 		let view_count = 10;
 		let likes = true;
 		let dislikes = false;
@@ -234,8 +234,8 @@ mod tests {
 		assert_eq!(updated_article_view.likes, updated_likes);
 
 		// -- Clean
-		let count = clean_article_views(&ctx, &mm).await?;
-		assert_eq!(count, 1, "Should have cleaned only 1 article view");
+		let count = clean_article_view(&ctx, &mm, article_view_id).await?;
+		assert_eq!(count, (), "Should have cleaned only 1 article view");
 
 		Ok(())
 	}

@@ -429,31 +429,6 @@ VALUES (
     CURRENT_TIMESTAMP
   );
 
-INSERT INTO subscription (
-    subscriber,
-    author_id,
-    subscription_start_time,
-    subscription_end_time
-  )
-VALUES (
-    1000,
-    1001,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP + INTERVAL '1 year'
-  ),
-  (
-    1002,
-    1001,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP + INTERVAL '1 year'
-  ),
-  (
-    1001,
-    1001,
-    CURRENT_TIMESTAMP,
-    CURRENT_TIMESTAMP + INTERVAL '1 year'
-  );
-
 -- Subscription 1,2,3
 INSERT INTO subscription (
     subscriber,

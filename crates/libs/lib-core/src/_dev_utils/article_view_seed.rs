@@ -67,4 +67,15 @@ pub async fn clean_article_views(
 	Ok(count)
 }
 
+pub async fn clean_article_view(
+	ctx: &Ctx,
+	mm: &ModelManager,
+	article_view_id: i64,
+) -> Result<(), Box<dyn Error>> {
+	// Delete the specified article view
+	let deleted_count = ArticleViewBmc::delete(ctx, mm, article_view_id).await?;
+
+	Ok(deleted_count)
+}
+
 // endregion: --- Article View seed/clean

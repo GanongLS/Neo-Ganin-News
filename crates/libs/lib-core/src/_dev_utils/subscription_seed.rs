@@ -55,4 +55,15 @@ pub async fn clean_subscriptions(ctx: &Ctx, mm: &ModelManager) -> model::Result<
 	Ok(count)
 }
 
+pub async fn clean_subscription(
+	ctx: &Ctx,
+	mm: &ModelManager,
+	subscription_id: i64,
+) -> model::Result<()> {
+	// Delete the specified article view
+	let deleted_count = SubscriptionBmc::delete(ctx, mm, subscription_id).await?;
+
+	Ok(deleted_count)
+}
+
 // endregion: --- Subscription seed/clean
