@@ -49,7 +49,7 @@ pub async fn mw_reponse_map(
 					}
 				});
 
-				debug!("CLIENT ERROR BODY:\n{client_error_body}");
+				debug!("CLIENT ERROR BODY:\n{client_error_body:#?}");
 
 				// Build the new response from the client_error_body
 				(*status_code, Json(client_error_body)).into_response()
