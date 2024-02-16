@@ -9,6 +9,7 @@ pub mod comment_rpc;
 pub mod conv_rpc;
 mod macro_utils;
 mod prelude;
+pub mod subscription_rpc;
 
 pub fn all_rpc_router() -> RpcRouter {
 	RpcRouter::new()
@@ -19,4 +20,5 @@ pub fn all_rpc_router() -> RpcRouter {
 		.extend(author_rpc::rpc_router())
 		.extend(category_rpc::rpc_router())
 		.extend(comment_rpc::rpc_router())
+		.extend(subscription_rpc::rpc_router())
 }
