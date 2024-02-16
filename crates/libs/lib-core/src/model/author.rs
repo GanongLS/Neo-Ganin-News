@@ -69,7 +69,7 @@ pub struct AuthorForCreate {
 	pub avatar_url: Option<String>,
 }
 
-#[derive(Clone, Fields, Default)]
+#[derive(Fields, Deserialize, Default)]
 pub struct AuthorForUpdate {
 	pub user_id: i64,
 	#[field(cast_as = "AUTHOR_TYPE")]
@@ -222,4 +222,3 @@ mod tests {
 }
 
 // endregion: --- Tests
-
