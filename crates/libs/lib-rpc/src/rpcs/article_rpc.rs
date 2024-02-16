@@ -1,6 +1,6 @@
 use crate::rpcs::prelude::*;
 use lib_core::model::article::{
-	Article, ArticleBmc, ArticleFilter, ArticleForCreate, ArticleForUpdate
+	Article, ArticleBmc, ArticleFilter, ArticleForCreate, ArticleForUpdate,
 };
 
 pub fn rpc_router() -> RpcRouter {
