@@ -40,7 +40,7 @@ pub struct CategoryForCreate {
 	pub is_featured: bool,
 }
 
-#[derive(Clone, Fields, Default)]
+#[derive(Fields, Default, Deserialize)]
 pub struct CategoryForUpdate {
 	pub name: String,
 	pub description: Option<String>,
